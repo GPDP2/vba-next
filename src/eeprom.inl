@@ -48,14 +48,14 @@ void eepromReset (void)
 	eepromSize = 512;
 }
 
-void eepromSaveGameMem(uint8_t *& data)
+void eepromSaveGameMem(u8 *& data)
 {
 	utilWriteDataMem(data, eepromSaveData);
 	utilWriteIntMem(data, eepromSize);
 	utilWriteMem(data, eepromData, 0x2000);
 }
 
-void eepromReadGameMem(const uint8_t *& data, int version)
+void eepromReadGameMem(const u8 *& data, int version)
 {
 	utilReadDataMem(data, eepromSaveData);
 	eepromSize = utilReadIntMem(data);

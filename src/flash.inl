@@ -13,10 +13,10 @@
 #define FLASH_SETBANK            9
 
 #ifdef __LIBRETRO__
-extern uint8_t libretro_save_buf[0x20000 + 0x2000];
-uint8_t *flashSaveMemory = libretro_save_buf;
+extern u8 libretro_save_buf[0x20000 + 0x2000];
+u8 *flashSaveMemory = libretro_save_buf;
 #else
-uint8_t flashSaveMemory[FLASH_128K_SZ];
+u8 flashSaveMemory[FLASH_128K_SZ];
 #endif
 
 int flashState = FLASH_READ_ARRAY;
@@ -51,12 +51,12 @@ void flashReset (void)
 	flashBank = 0;
 }
 
-void flashSaveGameMem(uint8_t *& data)
+void flashSaveGameMem(u8 *& data)
 {
 	utilWriteDataMem(data, flashSaveData3);
 }
 
-void flashReadGameMem(const uint8_t *& data, int)
+void flashReadGameMem(const u8 *& data, int)
 {
 	utilReadDataMem(data, flashSaveData3);
 }
@@ -76,11 +76,11 @@ void flashSetSize(int size)
 	// Added to make 64k saves compatible with 128k ones
 	// (allow wrongfuly set 64k saves to work for Pokemon games)
 	if ((size == 0x20000) && (flashSize == 0x10000))
-		memcpy((uint8_t *)(flashSaveMemory+0x10000), (uint8_t *)(flashSaveMemory), 0x10000);
+		memcpy((u8 *)(flashSaveMemory+0x10000), (u8 *)(flashSaveMemory), 0x10000);
 	flashSize = size;
 }
 
-uint8_t flashRead(uint32_t address)
+u8 flashRead(u32 address)
 {
 	address &= 0xFFFF;
 
@@ -106,7 +106,7 @@ uint8_t flashRead(uint32_t address)
 	return 0;
 }
 
-void flashSaveDecide(uint32_t address, uint8_t byte)
+void flashSaveDecide(u32 address, u8 byte)
 {
 	if(address == 0x0e005555)
    {
@@ -122,14 +122,14 @@ void flashSaveDecide(uint32_t address, uint8_t byte)
 	(*cpuSaveGameFunc)(address, byte);
 }
 
-void flashDelayedWrite(uint32_t address, uint8_t byte)
+void flashDelayedWrite(u32 address, u8 byte)
 {
   saveType = 2;
   cpuSaveGameFunc = flashWrite;
   flashWrite(address, byte);
 }
 
-void flashWrite(uint32_t address, uint8_t byte)
+void flashWrite(u32 address, u8 byte)
 {
 	address &= 0xFFFF;
 	switch(flashState) {
