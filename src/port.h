@@ -13,9 +13,6 @@
 
 #include "types.h"
 
-/* if a >= 0 return x else y*/
-#define isel(a, x, y) ((x & (~(a >> 31))) + (y & (a >> 31)))
-
 #ifdef FRONTEND_SUPPORTS_RGB565
 /* 16bit color - RGB565 */
 #define RED_MASK  0xf800

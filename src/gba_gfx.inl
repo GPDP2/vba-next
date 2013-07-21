@@ -26,9 +26,6 @@ static INLINE void gfxDrawTextScreen(bool process_layer0, bool process_layer1, b
 		u8 *charBase = &vram[((control >> 2) & 0x03) << 14];
 		u16 *screenBase = (u16 *)&vram[((control >> 8) & 0x1f) << 11];
 		u32 prio = ((control & 3)<<25) + 0x1000000;
-#ifdef BRANCHLESS_GBA_GFX
-		int tileXOdd = 0;
-#endif
 
 		u32 map_size = (control >> 14) & 3;
 		u32 sizeX = map_widths[map_size];
@@ -117,12 +114,7 @@ static INLINE void gfxDrawTextScreen(bool process_layer0, bool process_layer1, b
 
 				u8 color = charBase[(tile<<5) + (tileY<<2) + (tileX>>1)];
 
-#ifdef BRANCHLESS_GBA_GFX
-				tileXOdd = (tileX & 1) - 1; 
-				color = isel(tileXOdd, color >> 4, color & 0x0F);
-#else
 				(tileX & 1) ? color >>= 4 : color &= 0x0F;
-#endif
 
 				int pal = (data>>8) & 0xF0;
 				line[x] = color ? (READ16LE(&palette[pal + color])|prio): 0x80000000;
@@ -178,20 +170,6 @@ u16 pa,  u16 pb, u16 pc,  u16 pd, int& currentX, int& currentY, int changed, u32
 
 	int yshift = ((control >> 14) & 3)+4;
 
-#ifdef BRANCHLESS_GBA_GFX
-	int dx = pa & 0x7FFF;
-	int dmx = pb & 0x7FFF;
-	int dy = pc & 0x7FFF;
-	int dmy = pd & 0x7FFF;
-
-	dx |= isel(-(pa & 0x8000), 0, 0xFFFF8000);
-
-	dmx |= isel(-(pb & 0x8000), 0, 0xFFFF8000);
-
-	dy |= isel(-(pc & 0x8000), 0, 0xFFFF8000);
-
-	dmy |= isel(-(pd & 0x8000), 0, 0xFFFF8000);
-#else
 	int dx = pa & 0x7FFF;
 	if(pa & 0x8000)
 		dx |= 0xFFFF8000;
@@ -204,7 +182,6 @@ u16 pa,  u16 pb, u16 pc,  u16 pd, int& currentX, int& currentY, int changed, u32
 	int dmy = pd & 0x7FFF;
 	if(pd & 0x8000)
 		dmy |= 0xFFFF8000;
-#endif
 
 	if(io_registers[REG_VCOUNT] == 0)
 		changed = 3;
@@ -318,19 +295,6 @@ static INLINE void gfxDrawRotScreen16Bit( int& currentX,  int& currentY, int cha
 	if(BG2Y_H & 0x0800)
 		startY |= 0xF8000000;
 
-#ifdef BRANCHLESS_GBA_GFX
-	int dx = io_registers[REG_BG2PA] & 0x7FFF;
-	dx |= isel(-(io_registers[REG_BG2PA] & 0x8000), 0, 0xFFFF8000);
-
-	int dmx = io_registers[REG_BG2PB] & 0x7FFF;
-	dmx |= isel(-(io_registers[REG_BG2PB] & 0x8000), 0, 0xFFFF8000);
-
-	int dy = io_registers[REG_BG2PC] & 0x7FFF;
-	dy |= isel(-(io_registers[REG_BG2PC] & 0x8000), 0, 0xFFFF8000);
-
-	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
-	dmy |= isel(-(io_registers[REG_BG2PD] & 0x8000), 0, 0xFFFF8000);
-#else
 	int dx = io_registers[REG_BG2PA] & 0x7FFF;
 	if(io_registers[REG_BG2PA] & 0x8000)
 		dx |= 0xFFFF8000;
@@ -343,7 +307,6 @@ static INLINE void gfxDrawRotScreen16Bit( int& currentX,  int& currentY, int cha
 	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
 	if(io_registers[REG_BG2PD] & 0x8000)
 		dmy |= 0xFFFF8000;
-#endif
 
 	if(io_registers[REG_VCOUNT] == 0)
 		changed = 3;
@@ -423,19 +386,6 @@ static INLINE void gfxDrawRotScreen256(int &currentX, int& currentY, int changed
 	if(BG2Y_H & 0x0800)
 		startY |= 0xF8000000;
 
-#ifdef BRANCHLESS_GBA_GFX
-	int dx = io_registers[REG_BG2PA] & 0x7FFF;
-	dx |= isel(-(io_registers[REG_BG2PA] & 0x8000), 0, 0xFFFF8000);
-
-	int dmx = io_registers[REG_BG2PB] & 0x7FFF;
-	dmx |= isel(-(io_registers[REG_BG2PB] & 0x8000), 0, 0xFFFF8000);
-
-	int dy = io_registers[REG_BG2PC] & 0x7FFF;
-	dy |= isel(-(io_registers[REG_BG2PC] & 0x8000), 0, 0xFFFF8000);
-
-	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
-	dmy |= isel(-(io_registers[REG_BG2PD] & 0x8000), 0, 0xFFFF8000);
-#else
 	int dx = io_registers[REG_BG2PA] & 0x7FFF;
 	if(io_registers[REG_BG2PA] & 0x8000)
 		dx |= 0xFFFF8000;
@@ -448,7 +398,6 @@ static INLINE void gfxDrawRotScreen256(int &currentX, int& currentY, int changed
 	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
 	if(io_registers[REG_BG2PD] & 0x8000)
 		dmy |= 0xFFFF8000;
-#endif
 
 	if(io_registers[REG_VCOUNT] == 0)
 		changed = 3;
@@ -530,19 +479,6 @@ static INLINE void gfxDrawRotScreen16Bit160(int& currentX, int& currentY, int ch
 	if(BG2Y_H & 0x0800)
 		startY |= 0xF8000000;
 
-#ifdef BRANCHLESS_GBA_GFX
-	int dx = io_registers[REG_BG2PA] & 0x7FFF;
-	dx |= isel(-(io_registers[REG_BG2PA] & 0x8000), 0, 0xFFFF8000);
-
-	int dmx = io_registers[REG_BG2PB] & 0x7FFF;
-	dmx |= isel(-(io_registers[REG_BG2PB] & 0x8000), 0, 0xFFFF8000);
-
-	int dy = io_registers[REG_BG2PC] & 0x7FFF;
-	dy |= isel(-(io_registers[REG_BG2PC] & 0x8000), 0, 0xFFFF8000);
-
-	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
-	dmy |= isel(-(io_registers[REG_BG2PD] & 0x8000), 0, 0xFFFF8000);
-#else
 	int dx = io_registers[REG_BG2PA] & 0x7FFF;
 	if(io_registers[REG_BG2PA] & 0x8000)
 		dx |= 0xFFFF8000;
@@ -555,7 +491,6 @@ static INLINE void gfxDrawRotScreen16Bit160(int& currentX, int& currentY, int ch
 	int dmy = io_registers[REG_BG2PD] & 0x7FFF;
 	if(io_registers[REG_BG2PD] & 0x8000)
 		dmy |= 0xFFFF8000;
-#endif
 
 	if(io_registers[REG_VCOUNT] == 0)
 		changed = 3;
@@ -665,28 +600,17 @@ static INLINE void gfxDrawSprites (void)
 
 		if (a0val & 1)
 		{
-#ifdef BRANCHLESS_GBA_GFX
-			sizeX <<= isel(-(sizeX & (~31u)), 1, 0);
-			sizeY >>= isel(-(sizeY>8), 0, 1);
-#else
 			if (sizeX<32)
 				sizeX<<=1;
 			if (sizeY>8)
 				sizeY>>=1;
-#endif
 		}
 		else if (a0val & 2)
 		{
-#ifdef BRANCHLESS_GBA_GFX
-			sizeX >>= isel(-(sizeX>8), 0, 1);
-			sizeY <<= isel(-(sizeY & (~31u)), 1, 0);
-#else
 			if (sizeX>8)
 				sizeX>>=1;
 			if (sizeY<32)
 				sizeY<<=1;
-#endif
-
 		}
 
 
@@ -702,15 +626,10 @@ static INLINE void gfxDrawSprites (void)
 				sizeY<<=1;
 			}
 
-#ifdef BRANCHLESS_GBA_GFX
-			sy -= isel(256 - sy - sizeY, 0, 256);
-			sx -= isel(512 - sx - sizeX, 0, 512);
-#else
 			if((sy+sizeY) > 256)
 				sy -= 256;
 			if ((sx+sizeX)> 512)
 				sx -= 512;
-#endif
 
 			if (sx < 0)
 			{
@@ -1113,28 +1032,17 @@ static INLINE void gfxDrawOBJWin (void)
 
 		if (a0val & 1)
 		{
-#ifdef BRANCHLESS_GBA_GFX
-			sizeX <<= isel(-(sizeX & (~31u)), 1, 0);
-			sizeY >>= isel(-(sizeY>8), 0, 1);
-#else
 			if (sizeX<32)
 				sizeX<<=1;
 			if (sizeY>8)
 				sizeY>>=1;
-#endif
 		}
 		else if (a0val & 2)
 		{
-#ifdef BRANCHLESS_GBA_GFX
-			sizeX >>= isel(-(sizeX>8), 0, 1);
-			sizeY <<= isel(-(sizeY & (~31u)), 1, 0);
-#else
 			if (sizeX>8)
 				sizeX>>=1;
 			if (sizeY<32)
 				sizeY<<=1;
-#endif
-
 		}
 
 		int sy = (a0 & 255);
