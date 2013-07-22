@@ -12,8 +12,8 @@ static void mode5RenderLine (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 5: Render Line\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
 	if(graphics.layerEnable & 0x0400) {
 		int changed = gfxBG2Changed;
@@ -68,9 +68,8 @@ static void mode5RenderLineNoWindow (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 5: Render Line No Window\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
-
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
 	if(graphics.layerEnable & 0x0400) {
 		int changed = gfxBG2Changed;
@@ -160,9 +159,8 @@ static void mode5RenderLineAll (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 5: Render Line All\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
-
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
 	if(graphics.layerEnable & 0x0400)
 	{

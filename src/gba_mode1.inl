@@ -13,9 +13,8 @@ static void mode1RenderLine (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 1: Render Line\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
-
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
 	bool	process_layers[2];
 
@@ -112,9 +111,9 @@ static void mode1RenderLineNoWindow (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 1: Render Line No Window\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
 	bool	process_layers[2];
 
 	process_layers[0] = graphics.layerEnable & 0x0100;
@@ -261,9 +260,8 @@ static void mode1RenderLineAll (void)
 #ifdef REPORT_VIDEO_MODES
 	fprintf(stderr, "MODE 1: Render Line All\n");
 #endif
-	INIT_COLOR_DEPTH_LINE_MIX();
-
-	uint16_t *palette = (uint16_t *)graphics.paletteRAM;
+	u16 *lineMix = (pix + PIX_BUFFER_SCREEN_WIDTH * io_registers[REG_VCOUNT]);
+	u16 *palette = (u16*)graphics.paletteRAM;
 
 	bool inWindow0 = false;
 	bool inWindow1 = false;
