@@ -10,37 +10,38 @@
 
 void Gb_Osc::reset()
 {
-        output   = 0;
-        last_amp = 0;
-        delay    = 0;
-        phase    = 0;
-        enabled  = false;
+   output   = 0;
+   last_amp = 0;
+   delay    = 0;
+   phase    = 0;
+   enabled  = false;
 }
 
 INLINE void Gb_Osc::update_amp( int32_t time, int new_amp )
 {
-	int delta = new_amp - last_amp;
-        if ( delta )
-        {
-                last_amp = new_amp;
-                med_synth->offset( time, delta, output );
-        }
+   int delta = new_amp - last_amp;
+
+   if (delta)
+   {
+      last_amp = new_amp;
+      med_synth->offset( time, delta, output );
+   }
 }
 
 void Gb_Osc::clock_length()
 {
-        if ( (regs [4] & LENGTH_ENABLED) && length_ctr )
-        {
-                if ( --length_ctr <= 0 )
-                        enabled = false;
-        }
+   if ((regs [4] & LENGTH_ENABLED) && length_ctr)
+   {
+      if ( --length_ctr <= 0 )
+         enabled = false;
+   }
 }
 
 INLINE int Gb_Env::reload_env_timer()
 {
-        int raw = regs [2] & 7;
-        env_delay = (raw ? raw : 8);
-        return raw;
+   int raw = regs [2] & 7;
+   env_delay = (raw ? raw : 8);
+   return raw;
 }
 
 void Gb_Env::clock_envelope()
@@ -95,8 +96,8 @@ void Gb_Sweep_Square::clock_sweep()
 
 int Gb_Wave::access( unsigned addr ) const
 {
-	addr = (phase & BANK_SIZE_MIN_ONE) >> 1;
-	return addr & 0x0F;
+   addr = (phase & BANK_SIZE_MIN_ONE) >> 1;
+   return addr & 0x0F;
 }
 
 // write_register
@@ -190,21 +191,24 @@ bool Gb_Env::write_register( int frame_phase, int reg, int old, int data )
 
 bool Gb_Square::write_register( int frame_phase, int reg, int old_data, int data )
 {
-        bool result = Gb_Env::write_register( frame_phase, reg, old_data, data );
-        if ( result )
-                delay = (delay & (CLK_MUL_MUL_4 - 1)) + period();
-        return result;
+   bool result = Gb_Env::write_register( frame_phase, reg, old_data, data );
+
+   if (result)
+      delay = (delay & (CLK_MUL_MUL_4 - 1)) + period();
+
+   return result;
 }
 
 
 void Gb_Wave::corrupt_wave()
 {
-        int pos = ((phase + 1) & BANK_SIZE_MIN_ONE) >> 1;
-        if ( pos < 4 )
-                wave_ram [0] = wave_ram [pos];
-        else
-                for ( int i = 4; --i >= 0; )
-                        wave_ram [i] = wave_ram [(pos & ~3) + i];
+   int pos = ((phase + 1) & BANK_SIZE_MIN_ONE) >> 1;
+
+   if (pos < 4)
+      wave_ram [0] = wave_ram [pos];
+   else
+      for (int i = 4; --i >= 0;)
+         wave_ram [i] = wave_ram [(pos & ~3) + i];
 }
 
 /* Synthesis*/
